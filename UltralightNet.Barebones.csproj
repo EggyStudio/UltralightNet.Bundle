@@ -3,19 +3,69 @@
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
+        <Nullable>annotations</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <RootNamespace>UltralightNet</RootNamespace>
+        <AssemblyName>UltralightNet.Barebones</AssemblyName>
+
+        <!-- Disable default discovery so we can include only the curated source tree -->
+        <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+        <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+        <EnableDefaultNoneItems>false</EnableDefaultNoneItems>
+
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);CS1591;CS8500;CS8981;SYSLIB1054</NoWarn>
     </PropertyGroup>
 
     <!-- NuGet package metadata -->
     <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <PackageId>UltralightNet.Barebones</PackageId>
+        <Description>Ultralight .NET bindings (UltralightNet + AppCore + native binaries) bundled in a single package.</Description>
         <Authors>EggyStudio</Authors>
         <Company>UltralightNet.Barebones</Company>
         <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/EggyStudio/UltralightNet.Barebones</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/EggyStudio/UltralightNet.Barebones</PackageProjectUrl>
         <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
+        <PackageTags>ultralight;webview;browser;html;native;appcore</PackageTags>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
-    
+
+    <!-- All managed sources from the previous sub-projects -->
+    <ItemGroup>
+        <Compile Include="Source/UltralightNet/**/*.cs" Exclude="Source/UltralightNet/bin/**;Source/UltralightNet/obj/**" />
+        <Compile Include="Source/UltralightNet.AppCore/**/*.cs" Exclude="Source/UltralightNet.AppCore/bin/**;Source/UltralightNet.AppCore/obj/**" />
+    </ItemGroup>
+
+    <!-- Embedded resources from the original UltralightNet project -->
+    <ItemGroup>
+        <EmbeddedResource Include="Source/UltralightNet/runtimes/cacert.pem">
+            <LogicalName>UltralightNet.runtimes.cacert.pem</LogicalName>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Source/UltralightNet/runtimes/icudt67l.dat">
+            <LogicalName>UltralightNet.runtimes.icudt67l.dat</LogicalName>
+        </EmbeddedResource>
+    </ItemGroup>
+
+    <!-- Native binaries: copy to consumer output and pack into runtimes/<rid>/native -->
+    <ItemGroup>
+        <None Include="runtimes/win-x64/native/Ultralight.dll"      Pack="true" PackagePath="runtimes/win-x64/native/"   CopyToOutputDirectory="PreserveNewest" Link="runtimes/win-x64/native/%(Filename)%(Extension)" />
+        <None Include="runtimes/win-x64/native/UltralightCore.dll"  Pack="true" PackagePath="runtimes/win-x64/native/"   CopyToOutputDirectory="PreserveNewest" Link="runtimes/win-x64/native/%(Filename)%(Extension)" />
+        <None Include="runtimes/win-x64/native/WebCore.dll"         Pack="true" PackagePath="runtimes/win-x64/native/"   CopyToOutputDirectory="PreserveNewest" Link="runtimes/win-x64/native/%(Filename)%(Extension)" />
+        <None Include="runtimes/win-x64/native/AppCore.dll"         Pack="true" PackagePath="runtimes/win-x64/native/"   CopyToOutputDirectory="PreserveNewest" Link="runtimes/win-x64/native/%(Filename)%(Extension)" />
+
+        <None Include="runtimes/linux-x64/native/libUltralight.so"     Pack="true" PackagePath="runtimes/linux-x64/native/" CopyToOutputDirectory="PreserveNewest" Link="runtimes/linux-x64/native/%(Filename)%(Extension)" />
+        <None Include="runtimes/linux-x64/native/libUltralightCore.so" Pack="true" PackagePath="runtimes/linux-x64/native/" CopyToOutputDirectory="PreserveNewest" Link="runtimes/linux-x64/native/%(Filename)%(Extension)" />
+        <None Include="runtimes/linux-x64/native/libWebCore.so"        Pack="true" PackagePath="runtimes/linux-x64/native/" CopyToOutputDirectory="PreserveNewest" Link="runtimes/linux-x64/native/%(Filename)%(Extension)" />
+        <None Include="runtimes/linux-x64/native/libAppCore.so"        Pack="true" PackagePath="runtimes/linux-x64/native/" CopyToOutputDirectory="PreserveNewest" Link="runtimes/linux-x64/native/%(Filename)%(Extension)" />
+
+        <None Include="runtimes/osx-x64/native/libUltralight.dylib"     Pack="true" PackagePath="runtimes/osx-x64/native/"   CopyToOutputDirectory="PreserveNewest" Link="runtimes/osx-x64/native/%(Filename)%(Extension)" />
+        <None Include="runtimes/osx-x64/native/libUltralightCore.dylib" Pack="true" PackagePath="runtimes/osx-x64/native/"   CopyToOutputDirectory="PreserveNewest" Link="runtimes/osx-x64/native/%(Filename)%(Extension)" />
+        <None Include="runtimes/osx-x64/native/libWebCore.dylib"        Pack="true" PackagePath="runtimes/osx-x64/native/"   CopyToOutputDirectory="PreserveNewest" Link="runtimes/osx-x64/native/%(Filename)%(Extension)" />
+        <None Include="runtimes/osx-x64/native/libAppCore.dylib"        Pack="true" PackagePath="runtimes/osx-x64/native/"   CopyToOutputDirectory="PreserveNewest" Link="runtimes/osx-x64/native/%(Filename)%(Extension)" />
+    </ItemGroup>
+
 </Project>
