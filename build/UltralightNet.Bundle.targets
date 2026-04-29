@@ -1,0 +1,93 @@
+<Project>
+
+  <!--
+    UltralightNet.Bundle - native library relocation
+
+    Ultralight's native libraries (libUltralight, libUltralightCore, libWebCore,
+    libAppCore and their Win/macOS counterparts) ship inside this package under
+    runtimes/<rid>/native/. The .NET SDK's runtime-asset resolver flattens
+    RID-specific natives onto the build/publish root next to the host and any
+    other native dependencies (SDL3, ICU, ...).
+
+    The chained dlopen of libWebCore -> libUltralightCore + the bundled
+    libstdc++/libicu deps then collides with whatever the .NET host already
+    loaded and either fails outright or causes ABI mismatches.
+
+    Moving Ultralight back into its own runtimes/<rid>/native/ subtree gives it
+    an isolated $ORIGIN so its bundled deps load cleanly. UltralightNet's
+    NativeLibraryLoader probes that path first.
+
+    This file is imported automatically into every project that references the
+    UltralightNet.Bundle NuGet package (directly or transitively).
+  -->
+
+  <PropertyGroup>
+    <!-- Allow consumers to opt-out: <UltralightRelocateNatives>false</UltralightRelocateNatives> -->
+    <UltralightRelocateNatives Condition="'$(UltralightRelocateNatives)' == ''">true</UltralightRelocateNatives>
+  </PropertyGroup>
+
+  <!-- Resolve the effective RID for the current build/publish, even when
+       RuntimeIdentifier is not set explicitly (typical for a plain `dotnet build`). -->
+  <PropertyGroup Condition="'$(UltralightRelocateNatives)' == 'true'">
+    <_UltralightRid Condition="'$(RuntimeIdentifier)' != ''">$(RuntimeIdentifier)</_UltralightRid>
+    <_UltralightRid Condition="'$(_UltralightRid)' == '' AND '$(NETCoreSdkPortableRuntimeIdentifier)' != ''">$(NETCoreSdkPortableRuntimeIdentifier)</_UltralightRid>
+    <_UltralightRid Condition="'$(_UltralightRid)' == '' AND $([MSBuild]::IsOSPlatform('Linux'))">linux-x64</_UltralightRid>
+    <_UltralightRid Condition="'$(_UltralightRid)' == '' AND $([MSBuild]::IsOSPlatform('OSX'))">osx-x64</_UltralightRid>
+    <_UltralightRid Condition="'$(_UltralightRid)' == '' AND $([MSBuild]::IsOSPlatform('Windows'))">win-x64</_UltralightRid>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(UltralightRelocateNatives)' == 'true'">
+    <!-- Cross-platform Ultralight native filenames. Files that don't exist on
+         the current platform are filtered out via the Exists() check below. -->
+    <_UltralightNativeFile Include="libUltralight.so;libUltralightCore.so;libWebCore.so;libAppCore.so" />
+    <_UltralightNativeFile Include="Ultralight.dll;UltralightCore.dll;WebCore.dll;AppCore.dll" />
+    <_UltralightNativeFile Include="libUltralight.dylib;libUltralightCore.dylib;libWebCore.dylib;libAppCore.dylib" />
+  </ItemGroup>
+
+  <Target Name="_UltralightRelocateNativesAfterBuild"
+          AfterTargets="Build"
+          Condition="'$(UltralightRelocateNatives)' == 'true' AND '$(_UltralightRid)' != ''">
+    <PropertyGroup>
+      <_UltralightDestDir>$([System.IO.Path]::Combine('$(OutDir)', 'runtimes', '$(_UltralightRid)', 'native'))</_UltralightDestDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <_UltralightNativeAtRoot Include="@(_UltralightNativeFile->'$(OutDir)%(Identity)')" />
+      <_UltralightNativeToMove Include="@(_UltralightNativeAtRoot)" Condition="Exists('%(Identity)')" />
+    </ItemGroup>
+    <MakeDir Directories="$(_UltralightDestDir)"
+             Condition="'@(_UltralightNativeToMove)' != ''" />
+    <Copy SourceFiles="@(_UltralightNativeToMove)"
+          DestinationFolder="$(_UltralightDestDir)"
+          SkipUnchangedFiles="true"
+          Condition="'@(_UltralightNativeToMove)' != ''" />
+    <Delete Files="@(_UltralightNativeToMove)"
+            Condition="'@(_UltralightNativeToMove)' != ''" />
+    <Message Importance="normal"
+             Text="UltralightNet.Bundle: relocated @(_UltralightNativeToMove->Count()) native lib(s) -> $(_UltralightDestDir)"
+             Condition="'@(_UltralightNativeToMove)' != ''" />
+  </Target>
+
+  <Target Name="_UltralightRelocateNativesAfterPublish"
+          AfterTargets="Publish"
+          Condition="'$(UltralightRelocateNatives)' == 'true' AND '$(_UltralightRid)' != ''">
+    <PropertyGroup>
+      <_UltralightPublishDestDir>$([System.IO.Path]::Combine('$(PublishDir)', 'runtimes', '$(_UltralightRid)', 'native'))</_UltralightPublishDestDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <_UltralightPublishedAtRoot Include="@(_UltralightNativeFile->'$(PublishDir)%(Identity)')" />
+      <_UltralightPublishedToMove Include="@(_UltralightPublishedAtRoot)" Condition="Exists('%(Identity)')" />
+    </ItemGroup>
+    <MakeDir Directories="$(_UltralightPublishDestDir)"
+             Condition="'@(_UltralightPublishedToMove)' != ''" />
+    <Copy SourceFiles="@(_UltralightPublishedToMove)"
+          DestinationFolder="$(_UltralightPublishDestDir)"
+          SkipUnchangedFiles="true"
+          Condition="'@(_UltralightPublishedToMove)' != ''" />
+    <Delete Files="@(_UltralightPublishedToMove)"
+            Condition="'@(_UltralightPublishedToMove)' != ''" />
+    <Message Importance="normal"
+             Text="UltralightNet.Bundle: relocated @(_UltralightPublishedToMove->Count()) native lib(s) -> $(_UltralightPublishDestDir)"
+             Condition="'@(_UltralightPublishedToMove)' != ''" />
+  </Target>
+
+</Project>

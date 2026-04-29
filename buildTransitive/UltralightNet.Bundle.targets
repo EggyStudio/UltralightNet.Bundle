@@ -1,0 +1,16 @@
+<Project>
+
+  <!--
+    Transitive variant: re-import the canonical relocation targets so that
+    projects which depend on a project/package that depends on
+    UltralightNet.Bundle (rather than referencing it directly) still
+    get the Ultralight native libraries relocated into
+    runtimes/<rid>/native/ in their build and publish output.
+
+    Keeping a single source of truth in build/UltralightNet.Bundle.targets
+    avoids drift between the direct- and transitive-consumption code paths.
+  -->
+  <Import Project="$(MSBuildThisFileDirectory)..\build\UltralightNet.Bundle.targets" />
+
+</Project>
+

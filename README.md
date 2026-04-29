@@ -1,4 +1,4 @@
-# UltralightNet.Barebones
+# UltralightNet.Bundle
 
 A single-package .NET binding for the [Ultralight](https://ultralig.ht/) HTML rendering engine.
 
@@ -13,7 +13,7 @@ It targets **.NET 10**.
 ## Install
 
 ```sh
-dotnet add package UltralightNet.Barebones
+dotnet add package UltralightNet.Bundle
 ```
 
 ## Quick start
@@ -54,7 +54,7 @@ The native binaries are deployed automatically into `runtimes/<rid>/native/` whe
 dotnet pack -c Release
 ```
 
-Output: `bin/Release/UltralightNet.Barebones.<version>.nupkg` (and `.snupkg`).
+Output: `bin/Release/UltralightNet.Bundle.<version>.nupkg` (and `.snupkg`).
 
 ## License
 

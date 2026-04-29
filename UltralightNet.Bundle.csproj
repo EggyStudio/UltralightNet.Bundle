@@ -6,7 +6,7 @@
         <Nullable>annotations</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <RootNamespace>UltralightNet</RootNamespace>
-        <AssemblyName>UltralightNet.Barebones</AssemblyName>
+        <AssemblyName>UltralightNet.Bundle</AssemblyName>
 
         <!-- Disable default discovery so we can include only the curated source tree -->
         <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
@@ -21,13 +21,14 @@
     <PropertyGroup>
         <IsPackable>true</IsPackable>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-        <PackageId>UltralightNet.Barebones</PackageId>
+        <PackageId>UltralightNet.Bundle</PackageId>
+        <Version>2.1.0</Version>
         <Description>Ultralight .NET bindings (UltralightNet + AppCore + native binaries) bundled in a single package.</Description>
         <Authors>EggyStudio</Authors>
-        <Company>UltralightNet.Barebones</Company>
+        <Company>UltralightNet.Bundle</Company>
         <RepositoryType>git</RepositoryType>
-        <RepositoryUrl>https://github.com/EggyStudio/UltralightNet.Barebones</RepositoryUrl>
-        <PackageProjectUrl>https://github.com/EggyStudio/UltralightNet.Barebones</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/EggyStudio/UltralightNet.Bundle</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/EggyStudio/UltralightNet.Bundle</PackageProjectUrl>
         <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
         <PackageTags>ultralight;webview;browser;html;native;appcore</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -38,6 +39,24 @@
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
+
+    <!-- Ship the native-relocation MSBuild logic to consumers.
+         build/<id>.targets       -> imported by direct PackageReferences
+         buildTransitive/<id>.targets -> imported by transitive PackageReferences
+                                         (it just re-imports the canonical file
+                                         under build/, single source of truth). -->
+    <ItemGroup>
+        <None Include="build/UltralightNet.Bundle.targets"
+              Pack="true"
+              PackagePath="build/UltralightNet.Bundle.targets" />
+        <None Include="buildTransitive/UltralightNet.Bundle.targets"
+              Pack="true"
+              PackagePath="buildTransitive/UltralightNet.Bundle.targets" />
+    </ItemGroup>
+
+    <!-- Import the same logic locally so this project (and its bin/ output)
+         behaves exactly like a downstream consumer. -->
+    <Import Project="build/UltralightNet.Bundle.targets" />
 
     <!-- All managed sources from the previous sub-projects -->
     <ItemGroup>
