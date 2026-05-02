@@ -8,7 +8,7 @@
         <RootNamespace>UltralightNet</RootNamespace>
         <AssemblyName>UltralightNet.Bundle</AssemblyName>
 
-        <!-- Disable default discovery so we can include only the curated source tree -->
+        <!-- Compile only curated source items below. -->
         <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
         <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
         <EnableDefaultNoneItems>false</EnableDefaultNoneItems>
@@ -32,16 +32,18 @@
         <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
         <PackageTags>ultralight;webview;browser;html;native;appcore</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <IncludeSymbols>true</IncludeSymbols>
-        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <PackageIcon>logo.png</PackageIcon>
+        <Deterministic>true</Deterministic>
     </PropertyGroup>
 
+    <!-- Branding / docs -->
     <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="\" />
+        <None Include="README.md" Pack="true" />
+        <None Include=".github/assets/*" Pack="true" Visible="true" />
     </ItemGroup>
 
     <!-- Ship the native-relocation MSBuild logic to consumers.
-         build/<id>.targets       -> imported by direct PackageReferences
+         build/<id>.targets           -> imported by direct PackageReferences
          buildTransitive/<id>.targets -> imported by transitive PackageReferences
                                          (it just re-imports the canonical file
                                          under build/, single source of truth). -->
@@ -60,16 +62,16 @@
 
     <!-- All managed sources from the previous sub-projects -->
     <ItemGroup>
-        <Compile Include="Source/UltralightNet/**/*.cs" Exclude="Source/UltralightNet/bin/**;Source/UltralightNet/obj/**" />
-        <Compile Include="Source/UltralightNet.AppCore/**/*.cs" Exclude="Source/UltralightNet.AppCore/bin/**;Source/UltralightNet.AppCore/obj/**" />
+        <Compile Include="src/UltralightNet/**/*.cs" Exclude="src/UltralightNet/bin/**;src/UltralightNet/obj/**" />
+        <Compile Include="src/UltralightNet.AppCore/**/*.cs" Exclude="src/UltralightNet.AppCore/bin/**;src/UltralightNet.AppCore/obj/**" />
     </ItemGroup>
 
     <!-- Embedded resources from the original UltralightNet project -->
     <ItemGroup>
-        <EmbeddedResource Include="Source/UltralightNet/runtimes/cacert.pem">
+        <EmbeddedResource Include="src/UltralightNet/runtimes/cacert.pem">
             <LogicalName>UltralightNet.runtimes.cacert.pem</LogicalName>
         </EmbeddedResource>
-        <EmbeddedResource Include="Source/UltralightNet/runtimes/icudt67l.dat">
+        <EmbeddedResource Include="src/UltralightNet/runtimes/icudt67l.dat">
             <LogicalName>UltralightNet.runtimes.icudt67l.dat</LogicalName>
         </EmbeddedResource>
     </ItemGroup>
@@ -90,9 +92,6 @@
         <None Include="runtimes/osx-x64/native/libUltralightCore.dylib" Pack="true" PackagePath="runtimes/osx-x64/native/"   CopyToOutputDirectory="PreserveNewest" Link="runtimes/osx-x64/native/%(Filename)%(Extension)" />
         <None Include="runtimes/osx-x64/native/libWebCore.dylib"        Pack="true" PackagePath="runtimes/osx-x64/native/"   CopyToOutputDirectory="PreserveNewest" Link="runtimes/osx-x64/native/%(Filename)%(Extension)" />
         <None Include="runtimes/osx-x64/native/libAppCore.dylib"        Pack="true" PackagePath="runtimes/osx-x64/native/"   CopyToOutputDirectory="PreserveNewest" Link="runtimes/osx-x64/native/%(Filename)%(Extension)" />
-    </ItemGroup>
-    <ItemGroup>
-      <Content Include="README.md" />
     </ItemGroup>
 
 </Project>
